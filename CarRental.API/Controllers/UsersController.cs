@@ -1,5 +1,4 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
 using CarRental.API.Entities;
 using CarRental.API.Models;
 using CarRental.API.Services;
@@ -8,17 +7,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CarRental.API.Controllers
 {
-	[ApiController]
+    [ApiController]
 	[Route("api/users")]
 	public class UsersController : ControllerBase
 	{
         private readonly IUserRepository userRepository;
         private readonly IMapper mapper;
+        private readonly ILogger<UsersController> logger;
 
-        public UsersController(IUserRepository userRepository, IMapper mapper)
+        public UsersController(IUserRepository userRepository, IMapper mapper, ILogger<UsersController> logger)
 		{
             this.userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpPost("register")]
@@ -26,11 +27,13 @@ namespace CarRental.API.Controllers
         {
             if(await this.userRepository.UsernameExistsAsync(userForRegistration.Username))
             {
+                this.logger.LogWarning($"User whit username: {userForRegistration.Username} already exists");
                 return BadRequest($"User whit username: {userForRegistration.Username} already exists");
             }
 
             if(await this.userRepository.EmailExistsAsync(userForRegistration.Email))
             {
+                this.logger.LogWarning($"User with email: {userForRegistration.Email} already exists");
                 return BadRequest($"User with email: {userForRegistration.Email} already exists");
             }
 

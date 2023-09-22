@@ -14,7 +14,7 @@ namespace CarRental.API.Services
             this.context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task AddNewReservation(int userId, int carId, RentalHistory rentalHistory)
+        public async Task AddNewReservationAsync(int userId, int carId, RentalHistory rentalHistory)
         {
             var user = await this.context.Users
                 .Where(u => u.Id == userId)
@@ -24,14 +24,22 @@ namespace CarRental.API.Services
                 .Where(c => c.Id == carId)
                 .FirstOrDefaultAsync();
 
-            Console.WriteLine(rentalHistory.UserId+"-------------------42342342343243242344324234234");
-
             if(car!=null && user != null)
             {
                 user.Reservations.Add(rentalHistory);
                 car.Reservations.Add(rentalHistory);
             }
         }
+
+        public async Task<RentalHistory?> GetReservationForCarAndUserAsync(int userId, int carId, int reservationId)
+        {
+            return await this.context
+                .Reservations
+                .Where(r => r.CarId == carId && r.UserId == userId && r.Id == reservationId)
+                .FirstOrDefaultAsync();
+        }
+
+
 
         public async Task<bool> SaveChangesAsync()
         {

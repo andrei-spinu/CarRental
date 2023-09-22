@@ -14,11 +14,13 @@ namespace CarRental.API.Controllers
     {
         private readonly ICarRepository carRepository;
         private readonly IMapper mapper;
+        private readonly ILogger<CarsController> logger;
 
-        public CarsController(ICarRepository carRepository, IMapper mapper)
+        public CarsController(ICarRepository carRepository, IMapper mapper, ILogger<CarsController> logger)
         {
             this.carRepository = carRepository ?? throw new ArgumentNullException(nameof(carRepository));
             this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet]
@@ -34,6 +36,7 @@ namespace CarRental.API.Controllers
         {
             if (!await this.carRepository.CarExistsAsync(carId))
             {
+                this.logger.LogInformation($"Car with id: {carId} does not exist.");
                 return NotFound();
             }
 

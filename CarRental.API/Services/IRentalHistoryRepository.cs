@@ -6,7 +6,8 @@ namespace CarRental.API.Services
 	public interface IRentalHistoryRepository
 	{
 		Task<bool> SaveChangesAsync();
-		Task AddNewReservation(int userId, int carId, RentalHistory rentalHistory);
+		Task AddNewReservationAsync(int userId, int carId, RentalHistory rentalHistory);
+		Task<RentalHistory?> GetReservationForCarAndUserAsync(int userId, int carId, int reservationId);
 
 	}
 }
