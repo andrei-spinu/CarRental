@@ -120,8 +120,35 @@ namespace CarRental.API.Controllers
             return NoContent();
         }
 
-       // [HttpPut("{reservationid}/confirm")]
+        [HttpPut("{reservationid}/confirm")]
+        public async Task<ActionResult> ConfirmReservationForCarAndUser(int userId, int carId, int reservationId)
+        {
+            if (!await this.userRepository.UserExistsAsync(userId))
+            {
+                this.logger.LogInformation($"User with id {userId} wasn't found when accessing reservations.");
+                return NotFound();
+            }
 
+            if (!await this.carRepository.CarExistsAsync(carId))
+            {
+                this.logger.LogInformation($"Car with id {carId} wasn't found when accessing reservations.");
+                return NotFound();
+            }
+
+            var reservationEntity = await this.rentalHistoryRepository.GetReservationForCarAndUserAsync(userId, carId, reservationId);
+
+            if (reservationEntity == null)
+            {
+                this.logger.LogInformation($"Reservation with id {reservationId} wasn't found when accessing reservations.");
+                return NotFound($"Reservation with id {reservationId} wasn't found when accessing reservations.");
+            }
+
+            reservationEntity.Status = "Confirmed";
+
+            await this.rentalHistoryRepository.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
 
