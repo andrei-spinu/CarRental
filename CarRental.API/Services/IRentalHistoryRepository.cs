@@ -8,6 +8,8 @@ namespace CarRental.API.Services
 		Task<bool> SaveChangesAsync();
 		Task AddNewReservationAsync(int userId, int carId, RentalHistory rentalHistory);
 		Task<RentalHistory?> GetReservationForCarAndUserAsync(int userId, int carId, int reservationId);
+		Task UpdateActiveReservations();
+		Task UpdateCompletedReservations();
 
 	}
 }

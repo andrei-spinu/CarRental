@@ -1,6 +1,7 @@
 ﻿using System;
 using CarRental.API.DbContexts;
 using CarRental.API.Entities;
+using CarRental.API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRental.API.Services
@@ -48,6 +49,40 @@ namespace CarRental.API.Services
         public async Task<bool> CarRegistrationNumberExistsAsync(string registrationNumber)
         {
             return await this.context.Cars.AnyAsync(car => car.RegistrationNumber.Equals(registrationNumber));
+        }
+
+        public async Task<IEnumerable<Car>> GetAvailableCarsForDateRange(NewReservationDto newReservationDto)
+        {
+            var availableCars = await this.context
+                 .Cars
+                 .Where(car => !car.Reservations
+                    .Any(reservation => newReservationDto.StartDate < reservation.EndDate && newReservationDto.EndDate > reservation.StartDate))
+                 .ToListAsync();
+
+            return availableCars;
+        }
+
+        public async Task<bool> IsCarAvailableForDateRange(int carId, NewReservationDto newReservationDto)
+        {
+            var reservationsForCar = await this.context
+                .Reservations
+                .Where(reservation => reservation.CarId == carId)
+                .ToListAsync();
+
+            foreach(var reservation in reservationsForCar)
+            {
+                if(newReservationDto.StartDate < reservation.EndDate && newReservationDto.EndDate > reservation.StartDate)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public async Task<IEnumerable<Car>> GetReservationsForCarsAsync()
+        {
+            return await this.context.Cars.Include(car => car.Reservations).ToListAsync();
         }
     }
 }

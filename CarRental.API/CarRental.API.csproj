@@ -33,6 +33,7 @@
     <None Remove="Migrations\" />
     <None Remove="Utils\" />
     <None Remove="Utils\Validators\" />
+    <None Remove="BackgroundServices\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Entities\" />
@@ -44,5 +45,6 @@
     <Folder Include="Migrations\" />
     <Folder Include="Utils\" />
     <Folder Include="Utils\Validators\" />
+    <Folder Include="BackgroundServices\" />
   </ItemGroup>
 </Project>

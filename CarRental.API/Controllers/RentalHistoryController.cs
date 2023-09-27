@@ -40,14 +40,23 @@ namespace CarRental.API.Controllers
         {
             if (!await this.userRepository.UserExistsAsync(userId))
             {
-                this.logger.LogInformation($"User with id {userId} wasn't found when accessing reservations.");
-                return NotFound($"User with id {userId} wasn't found when accessing reservations.");
+                string message = $"User with id {userId} wasn't found when accessing reservations.";
+                this.logger.LogInformation(message);
+                return base.NotFound(message);
             }
 
             if (!await this.carRepository.CarExistsAsync(carId))
             {
-                this.logger.LogInformation($"Car with id {carId} wasn't found when accessing reservations.");
-                return NotFound($"Car with id {carId} wasn't found when accessing reservations.");
+                string message = $"Car with id {carId} wasn't found when accessing reservations.";
+                this.logger.LogInformation(message);
+                return NotFound(message);
+            }
+
+            if(!await this.carRepository.IsCarAvailableForDateRange(carId, newReservation))
+            {
+                string message = $"Car with {carId} is not available between {newReservation.StartDate} and {newReservation.EndDate}";
+                this.logger.LogInformation(message);
+                return BadRequest(message);
             }
 
             var car = await this.carRepository.GetCarByIdAsync(carId);

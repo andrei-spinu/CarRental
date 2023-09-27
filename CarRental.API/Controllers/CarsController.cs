@@ -92,6 +92,22 @@ namespace CarRental.API.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("available")]
+        public async Task<ActionResult<IEnumerable<CarDto>>> GetAvailableCarsForGivenDateRange(NewReservationDto newReservationDto)
+        {
+            var availableCarsEntities = await this.carRepository.GetAvailableCarsForDateRange(newReservationDto);
+
+            return Ok(this.mapper.Map<IEnumerable<CarDto>>(availableCarsEntities));
+        }
+
+        [HttpGet("reservations")]
+        public async Task<ActionResult<IEnumerable<ReservationsForCarDto>>> GetReservationsFoorCars()
+        {
+            var carEntities = await this.carRepository.GetReservationsForCarsAsync();
+
+            return Ok(this.mapper.Map<IEnumerable<ReservationsForCarDto>>(carEntities));
+        }
     }
 }
 

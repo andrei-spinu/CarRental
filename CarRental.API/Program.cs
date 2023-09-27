@@ -1,14 +1,12 @@
-﻿using CarRental.API.DbContexts;
+﻿using CarRental.API.BackgroundServices;
+using CarRental.API.DbContexts;
 using CarRental.API.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers()
     .AddNewtonsoftJson();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -18,6 +16,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICarRepository, CarRepository>();
 builder.Services.AddScoped<IRentalHistoryRepository, RentalHistoryRepository>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddHostedService<ReservationStatusUpdater>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,4 +38,3 @@ app.UseEndpoints(endpoints =>
 );
 
 app.Run();
-

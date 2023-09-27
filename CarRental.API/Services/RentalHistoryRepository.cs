@@ -45,6 +45,36 @@ namespace CarRental.API.Services
         {
             return (await this.context.SaveChangesAsync() > 0);
         }
+
+        public async Task UpdateActiveReservations()
+        {
+            var reservationsToActivate = await this.context
+                .Reservations
+                .Where(r => r.Status == "Confirmed" && r.StartDate < DateTime.Now)
+                .ToListAsync();
+
+            foreach(var reservation in reservationsToActivate)
+            {
+                reservation.Status = "Active";
+            }
+
+            await this.context.SaveChangesAsync();
+        }
+
+        public async Task UpdateCompletedReservations()
+        {
+            var reservationsToActivate = await this.context
+                .Reservations
+                .Where(r => r.Status == "Active" && r.EndDate < DateTime.Now)
+                .ToListAsync();
+
+            foreach (var reservation in reservationsToActivate)
+            {
+                reservation.Status = "Completed";
+            }
+
+            await this.context.SaveChangesAsync();
+        }
     }
 }
 

@@ -8,7 +8,7 @@ namespace CarRental.API.Utils.Validators
         public override bool IsValid(object value)
         {
             DateTime date = (DateTime) value;
-            return date > DateTime.Now;
+            return date >= DateTime.Now;
         }
     }
 }
