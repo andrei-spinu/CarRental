@@ -3,6 +3,7 @@ using AutoMapper;
 using CarRental.API.Entities;
 using CarRental.API.Models;
 using CarRental.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,6 +46,7 @@ namespace CarRental.API.Controllers
             return Ok(this.mapper.Map<CarDto>(carEntity));
         }
 
+        [Authorize(Policy = "MustBeAdmin")]
         [HttpPost]
         public async Task<ActionResult<CarDto>> AddNewCar(NewCarDto newCar)
         {
@@ -63,6 +65,7 @@ namespace CarRental.API.Controllers
             return CreatedAtRoute("GetCarById", new { carId = carForReturn.Id }, carForReturn);
         }
 
+        [Authorize(Policy = "MustBeAdmin")]
         [HttpPatch("{carid}")]
         public async Task<ActionResult> PartiallyUpdateCar(int carId, JsonPatchDocument<CarForUpdateDto> patchDocument)
         {
@@ -101,13 +104,35 @@ namespace CarRental.API.Controllers
             return Ok(this.mapper.Map<IEnumerable<CarDto>>(availableCarsEntities));
         }
 
+        [Authorize(Policy = "MustBeAdmin")]
         [HttpGet("reservations")]
-        public async Task<ActionResult<IEnumerable<ReservationsForCarDto>>> GetReservationsFoorCars()
+        public async Task<ActionResult<IEnumerable<ReservationsForCarDto>>> GetReservationsForCars()
         {
             var carEntities = await this.carRepository.GetReservationsForCarsAsync();
 
             return Ok(this.mapper.Map<IEnumerable<ReservationsForCarDto>>(carEntities));
         }
+
+        [Authorize(Policy = "MustBeAdmin")]
+        [HttpGet("{carid}/reservations")]
+        public async Task<ActionResult<ReservationsForCarDto>> GetReservationsForCar(int carId)
+        {
+            if (!await this.carRepository.CarExistsAsync(carId))
+            {
+                string message = $"Car with id: {carId} does not exist.";
+                this.logger.LogInformation(message);
+                return NotFound(message);
+            }
+
+            var carEntity = await this.carRepository.GetReservationsForCarAsync(carId);
+
+            var carToReturn = this.mapper.Map<ReservationsForCarDto>(carEntity);
+
+            return Ok(carToReturn);
+
+        }
+
+
     }
 }
 

@@ -28,6 +28,7 @@ namespace CarRental.API.Entities
 		[Required]
 		public string LastName { get; set; }
 		public string? Address { get; set; }
+		public string? Role { get; set; }
 
 		public ICollection<RentalHistory> Reservations { get; set; } = new List<RentalHistory>();
 		public ICollection<Review> Reviews { get; set; } = new List<Review>();

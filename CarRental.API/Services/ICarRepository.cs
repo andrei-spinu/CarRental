@@ -9,8 +9,9 @@ namespace CarRental.API.Services
 		Task AddNewCarAsync(Car car);
 		Task<bool> SaveChangesAsync();
 		Task<IEnumerable<Car>> GetCarsAsync();
-		Task<IEnumerable<Car>> GetReservationsForCarsAsync();
-		Task<IEnumerable<Car>> GetAvailableCarsForDateRange(NewReservationDto newReservationDto);
+		Task<Car> GetReservationsForCarAsync(int carId);
+        Task<IEnumerable<Car>> GetReservationsForCarsAsync();
+        Task<IEnumerable<Car>> GetAvailableCarsForDateRange(NewReservationDto newReservationDto);
 		Task<Car> GetCarByIdAsync(int carId);
 		Task<bool> CarExistsAsync(int carId);
 		Task<bool> CarRegistrationNumberExistsAsync(string registrationNumber);

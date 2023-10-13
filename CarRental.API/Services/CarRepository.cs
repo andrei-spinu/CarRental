@@ -80,6 +80,15 @@ namespace CarRental.API.Services
             return true;
         }
 
+        public async Task<Car?> GetReservationsForCarAsync(int carId)
+        {
+            return await this.context
+                .Cars
+                .Include(car => car.Reservations)
+                .Where(car => car.Id == carId)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<IEnumerable<Car>> GetReservationsForCarsAsync()
         {
             return await this.context.Cars.Include(car => car.Reservations).ToListAsync();

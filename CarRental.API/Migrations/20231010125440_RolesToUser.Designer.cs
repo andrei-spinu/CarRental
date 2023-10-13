@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CarRental.API.Migrations
 {
     [DbContext(typeof(CarRentalContext))]
-    [Migration("20230920142351_CarRentalMigration")]
-    partial class CarRentalMigration
+    [Migration("20231010125440_RolesToUser")]
+    partial class RolesToUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -163,6 +163,9 @@ namespace CarRental.API.Migrations
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
+
+                    b.Property<string>("Role")
+                        .HasColumnType("text");
 
                     b.Property<string>("Username")
                         .IsRequired()

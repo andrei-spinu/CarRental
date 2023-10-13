@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CarRental.API.Entities;
 
 namespace CarRental.API.Entities
 {
@@ -22,6 +23,7 @@ namespace CarRental.API.Entities
         [Range(1,5)]
         public int Rating { get; set; }
         public string? Comment { get; set; }
+        [Column(TypeName = "date")]
         public DateTime ReviewDate { get; set; }
 
     }

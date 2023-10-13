@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Security.Claims;
 using AutoMapper;
 using CarRental.API.Entities;
 using CarRental.API.Models;
 using CarRental.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace CarRental.API.Controllers
 {
@@ -34,10 +30,19 @@ namespace CarRental.API.Controllers
             this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
-
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<RentalHistory>> CreateNewReservation(int userId, int carId, NewReservationDto newReservation)
         {
+
+            var userIdFromToken = HttpContext.User.Claims.FirstOrDefault(user => user.Type.Equals(ClaimTypes.NameIdentifier))?.Value;
+            var userRoleFromToken = HttpContext.User.Claims.FirstOrDefault(user => user.Type.Equals(ClaimTypes.Role))?.Value;
+
+            if (!userIdFromToken.Equals(userId.ToString()) && userRoleFromToken.Equals("USER"))
+            {
+                return Forbid();
+            }
+           
             if (!await this.userRepository.UserExistsAsync(userId))
             {
                 string message = $"User with id {userId} wasn't found when accessing reservations.";
@@ -72,10 +77,19 @@ namespace CarRental.API.Controllers
             return CreatedAtRoute("GetReservationForCarAndUser", new {userId = userId, carId = carId, reservationId = reservationToReturn.Id}, reservationToReturn);
         }
 
+        [Authorize]
         [HttpGet("{reservationid}", Name = "GetReservationForCarAndUser")]
         public async Task<ActionResult<ReservationDto>> GetReservationForCarAndUser(int userId, int carId, int reservationId)
         {
-            if(!await this.userRepository.UserExistsAsync(userId))
+            var userIdFromToken = HttpContext.User.Claims.FirstOrDefault(user => user.Type.Equals(ClaimTypes.NameIdentifier))?.Value;
+            var userRoleFromToken = HttpContext.User.Claims.FirstOrDefault(user => user.Type.Equals(ClaimTypes.Role))?.Value;
+
+            if (!userIdFromToken.Equals(userId.ToString()) && userRoleFromToken.Equals("USER"))
+            {
+                return Forbid();
+            }
+
+            if (!await this.userRepository.UserExistsAsync(userId))
             {
                 this.logger.LogInformation($"User with id {userId} wasn't found when accessing reservations.");
                 return NotFound();
@@ -99,9 +113,18 @@ namespace CarRental.API.Controllers
          
         }
 
+        [Authorize]
         [HttpPut("{reservationid}/cancel")]
         public async Task<ActionResult> CancelReservationForCarAndUser(int userId, int carId, int reservationId)
         {
+            var userIdFromToken = HttpContext.User.Claims.FirstOrDefault(user => user.Type.Equals(ClaimTypes.NameIdentifier))?.Value;
+            var userRoleFromToken = HttpContext.User.Claims.FirstOrDefault(user => user.Type.Equals(ClaimTypes.Role))?.Value;
+
+            if (!userIdFromToken.Equals(userId.ToString()) && userRoleFromToken.Equals("USER"))
+            {
+                return Forbid();
+            }
+
             if (!await this.userRepository.UserExistsAsync(userId))
             {
                 this.logger.LogInformation($"User with id {userId} wasn't found when accessing reservations.");
@@ -129,6 +152,7 @@ namespace CarRental.API.Controllers
             return NoContent();
         }
 
+        [Authorize(Policy = "MustBeAdmin")]
         [HttpPut("{reservationid}/confirm")]
         public async Task<ActionResult> ConfirmReservationForCarAndUser(int userId, int carId, int reservationId)
         {

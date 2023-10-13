@@ -12,7 +12,8 @@ namespace CarRental.API.Profiles
 			CreateMap<Entities.Car, Models.CarForUpdateDto>();
 			CreateMap<Models.CarForUpdateDto, Entities.Car>();
 			CreateMap<Entities.Car, Models.ReservationsForCarDto>();
-		}
+			CreateMap<Entities.Car, Models.ReviewsForCarDto>();
+        }
 	}
 }
 

@@ -13,6 +13,7 @@ namespace CarRental.API.Services
 		Task<bool> UsernameExistsAsync(string username);
 		Task<bool> UserExistsAsync(int id);
 		void DeleteUser(User user);
+		Task<User> GetUserByUserNameAndPassword(string username, string password);
 	}
 }
 

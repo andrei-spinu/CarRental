@@ -61,6 +61,14 @@ namespace CarRental.API.Services
         {
             this.context.Remove(user);
         }
+
+        public async Task<User?> GetUserByUserNameAndPassword(string username, string password)
+        {
+            return await this.context
+                .Users
+                .FirstOrDefaultAsync(user => user.Username.Equals(username) && user.Password.Equals(password));
+        }
+
     }
 }
 

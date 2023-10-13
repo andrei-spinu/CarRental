@@ -1,15 +1,17 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
 using CarRental.API.Entities;
 using CarRental.API.Models;
 using CarRental.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarRental.API.Controllers
 {
     [ApiController]
-	[Route("api/users")]
-	public class UsersController : ControllerBase
+    [Route("api/users")]
+    public class UsersController : ControllerBase
 	{
         private readonly IUserRepository userRepository;
         private readonly IMapper mapper;
@@ -25,6 +27,7 @@ namespace CarRental.API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<UserForRegistrationDto>> registerUser(UserForRegistrationDto userForRegistration)
         {
+            logger.LogInformation("INFO");
             if(await this.userRepository.UsernameExistsAsync(userForRegistration.Username))
             {
                 this.logger.LogWarning($"User whit username: {userForRegistration.Username} already exists");
@@ -38,6 +41,8 @@ namespace CarRental.API.Controllers
             }
 
             var finalUserForRegistration = this.mapper.Map<User>(userForRegistration);
+
+            finalUserForRegistration.Role = "USER";
 
             await this.userRepository.RegisterUserAsync(finalUserForRegistration);
             await this.userRepository.SaveChangesAsync();
@@ -69,6 +74,7 @@ namespace CarRental.API.Controllers
             return Ok(this.mapper.Map<UserDto>(user));
         }
 
+        [Authorize]
         [HttpPut("profile/{userid}")]
         public async Task<ActionResult> UpdateUser(int userId, UserForUpdateDto userForUpdate)
         {
@@ -86,10 +92,19 @@ namespace CarRental.API.Controllers
             return NoContent();
         }
 
+        [Authorize]
         [HttpPatch("profile/{userid}")]
         public async Task<ActionResult> PartiallyUpdateUser(int userId, JsonPatchDocument<UserForUpdateDto> patchDocument)
         {
-            if(!await this.userRepository.UserExistsAsync(userId))
+
+            var userIdFromToken = HttpContext.User.Claims.FirstOrDefault(user => user.Type.Equals(ClaimTypes.NameIdentifier))?.Value;
+            var userRoleFromToken = HttpContext.User.Claims.FirstOrDefault(user => user.Type.Equals(ClaimTypes.Role))?.Value;
+
+            if (!userIdFromToken.Equals(userId.ToString()) && userRoleFromToken.Equals("USER"))
+            {
+                return Forbid();
+            }
+            if (!await this.userRepository.UserExistsAsync(userId))
             {
                 return NotFound();
             }
@@ -117,6 +132,27 @@ namespace CarRental.API.Controllers
             return NoContent();
         }
 
+        [Authorize(Policy = "MustBeAdmin")]
+        [HttpPut("{userId}/admin")]
+        public async Task<ActionResult> UpdateRoleToAdmin(int userId)
+        {
+            var userEntity = await this.userRepository
+                .GetUserById(userId);
+
+            if(userEntity == null)
+            {
+                return NotFound();
+            }
+
+            userEntity.Role = "ADMIN";
+
+            await this.userRepository.SaveChangesAsync();
+
+            return NoContent();
+
+        }
+
+        [Authorize(Policy = "MustBeAdmin")]
         [HttpDelete("profile/{userid}")]
         public async Task<ActionResult> DeleteUser(int userId)
         {
